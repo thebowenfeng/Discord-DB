@@ -35,11 +35,20 @@ a cash sinkhole if users are not careful with their usage (and also a restrictiv
 - Small scale or personal projects
 
 [1\] Discord's rate limiting system can limit how frequently an API can be triggered. However, individual API's payload size is unrestricted (up to a hard limit of 25MB imposed by Discord).
+
 [2\] Race conditions happens when a DB write can cause indexes to become stale if there is a concurrent write in progress. DB reads do not suffer from race conditions.
 
 ## Documentation
 
-In progres...
+### Configuring security
+
+As this library is designed to be a frontend client, this means extra care has to be taken in order not to leak sensitive information, such as your discord bot token. Below is a recommended method of protecting access to your database.
+
+Similar to how other FE clients (such as Firebase) protect DB access, there should be multiple discord bots with varying access levels. Users should only have access to clients configuered with bots that can access information which they are authorized to access. In general, each user should have their own corresponding bot with access to only tables containing their data (or data they have access to). This means the database should be setup such that each user gets their own table.
+
+However, the database can also be protected with limited write access, as opposed to silo'ing by user. For example, a public blogging site is going to want to have a bot with "read all" permission, but no write permissions, for public users. The "write" permission should only be reserved for people that have authorization to blog.
+
+The general rule of thumb is to assume that the user has access to all information contained within the code, which includes statically configuered bot tokens. Therefore, one must secure the database in such a way that even if a malicious actor obtained a token, they can do no harm other than intended/permissiable action. 
 
 ## Contribution
 
