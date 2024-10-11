@@ -116,14 +116,14 @@ async function createTable(tableName) {
 }
 
 async function main() {
-    const command = process.argv.slice(2).map((str) => str.toLowerCase());
+    const command = process.argv.slice(2);
     const client = new DiscordDbClient(GUILD_ID, process.env.TOKEN);
 
     // Process command
-    if (command[0] === 'create' && command[1] === 'table') {
+    if (command[0].toLowerCase() === 'create' && command[1].toLowerCase() === 'table') {
         return await createTable(command[2])
     }
-    if (command[0] === 'create' && command[1] === 'schema') {
+    if (command[0].toLowerCase() === 'create' && command[1].toLowerCase() === 'schema') {
         if (command.length % 2 === 0 || command.length < 5) {
             return console.error("Failed to create schema: Invalid number of arguments specified");
         }
@@ -135,11 +135,11 @@ async function main() {
         }
         return await createSchema(command[2], schema);
     }
-    if (command[0] === 'get' && command[1] === 'schema') {
+    if (command[0].toLowerCase() === 'get' && command[1].toLowerCase() === 'schema') {
         const tables = await fetchGet(`https://discord.com/api/v10/guilds/${GUILD_ID}/channels`);
         return console.log(await getSchema(command[2], tables));
     }
-    if (command[0] === 'insert') {
+    if (command[0].toLowerCase() === 'insert') {
         if (command.length % 2 !== 0 || command.length < 4) {
             return console.error("Failed to insert into table: Invalid number of arguments provided");
         }
@@ -151,20 +151,20 @@ async function main() {
         }
         return await client.insert(command[1], data);
     }
-    if (command[0] === 'create' && command[1] === 'index') {
+    if (command[0].toLowerCase() === 'create' && command[1].toLowerCase() === 'index') {
         return await createIndex(command[2], command[3]);
     }
-    if (command[0] === 'select') {
+    if (command[0].toLowerCase() === 'select') {
         const query = select(command[1]);
         const conditionals = [];
         let currCmdIndex = 3;
-        if (command[2] === 'where') {
+        if (command[2].toLowerCase() === 'where') {
             while (true) {
-                if (command[currCmdIndex] === 'limit' || command[currCmdIndex] === 'orderby' || currCmdIndex >= command.length) {
+                if (currCmdIndex >= command.length || command[currCmdIndex].toLowerCase() === 'limit' || command[currCmdIndex].toLowerCase() === 'orderby') {
                     break;
                 }
                 const columnName = command[currCmdIndex];
-                const operator = command[currCmdIndex + 1];
+                const operator = command[currCmdIndex + 1].toLowerCase();
                 const value = command[currCmdIndex + 2];
                 if (operator === '=') {
                     conditionals.push(equals(columnName, value));
@@ -181,22 +181,22 @@ async function main() {
             }
         }
         query.where(...conditionals);
-        if (command[currCmdIndex] === 'orderby') {
-            if (command[currCmdIndex + 2] === 'asc') {
+        if (command[currCmdIndex]?.toLowerCase() === 'orderby') {
+            if (command[currCmdIndex + 2].toLowerCase() === 'asc') {
                 query.orderBy(ascending(command[currCmdIndex + 1]));
-            } else if (command[currCmdIndex + 2] === 'dsc') {
+            } else if (command[currCmdIndex + 2].toLowerCase() === 'dsc') {
                 query.orderBy(descending(command[currCmdIndex + 1]));
             } else {
                 return console.error("Failed to read into table: Invalid order query format");
             }
             currCmdIndex += 3;
         }
-        if (command[currCmdIndex] === 'limit') {
+        if (command[currCmdIndex]?.toLowerCase() === 'limit') {
             query.limitBy(!isNaN(Number(command[currCmdIndex + 1])) ? Number(command[currCmdIndex + 1]) : 0);
         }
         return console.log(await client.read(query));
     }
-    if (command[0] === 'update') {
+    if (command[0].toLowerCase() === 'update') {
         if (command.length % 2 === 0 || command.length < 5) {
             return console.error("Failed to insert into table: Invalid number of arguments provided");
         }
@@ -208,7 +208,7 @@ async function main() {
         }
         return await client.update(command[1], command[2], data);
     }
-    if (command[0] === 'delete') {
+    if (command[0].toLowerCase() === 'delete') {
         return await client.delete(command[1], command[2]);
     }
 }

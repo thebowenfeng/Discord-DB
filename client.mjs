@@ -134,6 +134,15 @@ export default class DiscordDbClient {
             let resultSet = [];
             const globalIndexCache = {};
             for (const condition of query.conditionals) {
+                if (condition.columnName === 'dbId') {
+                    if (condition.operator === '=') {
+                        queryFilterResult.push([condition.value]);
+                    } else if (condition.operator === 'in') {
+                        queryFilterResult.push(condition.values);
+                    }
+                    continue;
+                }
+
                 const validIndexes = [];
                 for (const record of metaRecords) {
                     const filename = record.attachments[0].filename.split('_');
