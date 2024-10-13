@@ -56,6 +56,10 @@ CLI commands are case insensitive, its arguments are case sensitive.\
 
 Any writes to the DB (create, update, delete) on the same table have the potential to cause race conditions and inconsistent indexing. It is recommended to limit concurrent writes as much as possible.
 
+Disord enforces a hard limit of 25MB per message, which means individual records cannot exceed 25MB in size when serialised into a JSON string. Although indexes support chunking, records currently do not.
+
+Avoid sending concurrent async requests when possible (i.e using `Promise.all` to wait for a batch of requests). Although the client is written to respect Discord's rate limit headers, it cannot cancel in-flight requests which means a trigger-happy function can potentially dispatch too many requests before the first request can respond with relevant rate limit information. Tripping discord's rate limit will not cause immediate harm (and the client is written to respect rate limited responses). However, as per Discord's official API docs, frequent violations can result in a ban.
+
 #### Creating a table (CLI only)
 
 Creates a new table by creating a new channel
